@@ -5,6 +5,7 @@ import 'package:get/state_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Get.lazyPut(() => prefs);
   Get.lazyPut(() => HomeController(prefs: Get.find()));
@@ -31,6 +32,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Get.find<HomeController>().getData();
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -62,37 +64,61 @@ class SplashScreen extends StatelessWidget {
                     ),
                   ),
                 )
-              : ListView.builder(
-                  itemCount: state.scannedData.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+              : state.scannedData.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "No Device found !!\nreload to scan",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: state.scannedData.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
                             children: [
-                              const Icon(
-                                Icons.bluetooth,
-                                color: Colors.blue,
-                                size: 30,
-                              ),
-                              const SizedBox(
-                                width: 15,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    state.scannedData[index].name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  const Icon(
+                                    Icons.bluetooth,
+                                    color: Colors.blue,
+                                    size: 30,
                                   ),
+                                  const SizedBox(
+                                    width: 15,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        state.scannedData[index].name ?? "",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        state.scannedData[index].address ?? "",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
                                   Text(
-                                    state.scannedData[index].address,
+                                    state.scannedData[index].isPaired!
+                                        ? "Paired"
+                                        : "",
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
@@ -100,26 +126,14 @@ class SplashScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const Spacer(),
-                              Text(
-                                !state.scannedData[index].paired
-                                    ? "Paired"
-                                    : "",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                ),
+                              const Divider(
+                                height: 20,
                               ),
                             ],
                           ),
-                          const Divider(
-                            height: 20,
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
-                  },
-                );
         }),
       ),
     );
