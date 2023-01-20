@@ -19,14 +19,16 @@ class HomeController extends GetxController implements GetxService {
   List<BluetoothData> scannedData = [];
 
   getData() {
-    scannedData = bluetoothDataFromJson(jsonDecode(prefs.getString("b_data")!));
+    if (scannedData.isNotEmpty && prefs.containsKey('b_data')) {
+      scannedData =
+          bluetoothDataFromJson(jsonDecode(prefs.getString("b_data")!));
+    }
+
     update();
   }
 
   setData() {
-    if (scannedData.isNotEmpty && prefs.containsKey('b_data')) {
-      prefs.setString("b_data", jsonEncode(bluetoothDataToJson(scannedData)));
-    }
+    prefs.setString("b_data", jsonEncode(bluetoothDataToJson(scannedData)));
   }
 
   startScanning() async {
